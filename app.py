@@ -85,7 +85,7 @@ def predict(location, imipenem, ceftazidime, gentamicin, augmentin, ciprofloxaci
     # OUTPUT TEXT
     # =========================
     result_text = f"""
-    <h2>🧠 AI Recommendation System</h2>
+    <h2> AI Recommendation System</h2>
 
     <h3>✅ Best Antibiotic: <span style='color:green'>{best}</span></h3>
 
@@ -130,7 +130,7 @@ def predict(location, imipenem, ceftazidime, gentamicin, augmentin, ciprofloxaci
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
 
     gr.Markdown("""
-# 🧠 AI Antibiotic Recommendation System
+#  AI Antibiotic Recommendation System
 ### Smart prediction + recommendation + reporting
 """)
 
