@@ -4,14 +4,14 @@ import numpy as np
 import pandas as pd
 
 import matplotlib
-matplotlib.use("Agg")  # Fix for Render
+matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import os
 
 # =========================
-# LOAD DATASET (for UI)
+# LOAD DATASET
 # =========================
 try:
     df = pd.read_excel("Dataset.xlsx")
@@ -21,13 +21,16 @@ except:
     locations = ["IFE-T"]
 
 # =========================
-# LOAD MODEL
+# LOAD MODEL (optional)
 # =========================
-with open("model.pkl", "rb") as f:
-    model = pickle.load(f)
+try:
+    with open("model.pkl", "rb") as f:
+        model = pickle.load(f)
+except:
+    model = None
 
 # =========================
-# AUTO-FILL FUNCTION
+# AUTO-FILL
 # =========================
 def autofill(location):
     if df is not None:
@@ -44,54 +47,82 @@ def autofill(location):
     return 20, 20, 20, 20, 20
 
 # =========================
-# PREDICTION FUNCTION
+# CLASSIFICATION LOGIC
+# =========================
+def classify(value):
+    if value < 15:
+        return "Resistant"
+    elif value <= 20:
+        return "Intermediate"
+    else:
+        return "Safe"
+
+# =========================
+# PREDICT FUNCTION
 # =========================
 def predict(location, imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin):
     try:
-        location_map = {loc: i for i, loc in enumerate(locations)}
-        loc = location_map.get(location, 0)
+        data_dict = {
+            "IMIPENEM": classify(imipenem),
+            "CEFTAZIDIME": classify(ceftazidime),
+            "GENTAMICIN": classify(gentamicin),
+            "AUGMENTIN": classify(augmentin),
+            "CIPROFLOXACIN": classify(ciprofloxacin)
+        }
 
-        #  6 FEATURES
-        data = np.array([[loc, imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin]])
+        safe, intermediate, resistant = [], [], []
 
-        pred = model.predict(data)[0]
-        probs = model.predict_proba(data)[0]
-        confidence = round(max(probs) * 100, 2)
+        for k, v in data_dict.items():
+            if v == "Safe":
+                safe.append(k)
+            elif v == "Intermediate":
+                intermediate.append(k)
+            else:
+                resistant.append(k)
 
-        if pred == 0:
-            result = "🟢 Susceptible"
-            recommendation = "Use this antibiotic"
-        elif pred == 1:
-            result = "🟡 Intermediate"
-            recommendation = "Use with caution"
+        # BEST ANTIBIOTIC
+        if safe:
+            best = safe[0]
+        elif intermediate:
+            best = intermediate[0]
         else:
-            result = "🔴 Resistant"
-            recommendation = "Avoid this antibiotic"
+            best = "None"
+
+        # CLEAN TEXT
+        safe_text = ", ".join(safe) if safe else "None"
+        inter_text = ", ".join(intermediate) if intermediate else "None"
+        res_text = ", ".join(resistant) if resistant else "None"
 
         result_text = f"""
-🔬 Prediction Result
+🧠 AI Recommendation System
 
-Result: {result}
-Confidence: {confidence}%
+✅ Best Antibiotic: {best}
 
-Recommendation:
-{recommendation}
+🟢 Safe:
+{safe_text}
+
+🟡 Intermediate:
+{inter_text}
+
+🔴 Resistant:
+{res_text}
 """
 
         # =========================
-        #  BAR GRAPH (CLEAR NAMES)
+        # GRAPH (FIXED LABELS)
         # =========================
-        antibiotics = ["IMIPENEM", "CEFTAZIDIME", "GENTAMICIN", "AUGMENTIN", "CIPROFLOXACIN"]
+        antibiotics = list(data_dict.keys())
         values = [imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin]
 
-        fig1, ax1 = plt.subplots(figsize=(8, 5))
+        fig1, ax1 = plt.subplots(figsize=(10, 6))
         ax1.barh(antibiotics, values)
-        ax1.set_title("Antibiotic Resistance Levels")
-        ax1.set_xlabel("Value")
+        ax1.set_title("Resistance Graph (0=Safe, 2=Resistant)")
+        ax1.set_xlabel("Values")
+        ax1.tick_params(axis='y', labelsize=10)
         plt.tight_layout()
 
         # =========================
-        #  NETWORK GRAPH (CLEAN)
+        # NETWORK GRAPH (CLEAN)
         # =========================
         G = nx.Graph()
 
@@ -102,8 +133,16 @@ Recommendation:
             for j in range(i + 1, len(antibiotics)):
                 G.add_edge(antibiotics[i], antibiotics[j])
 
-        fig2, ax2 = plt.subplots(figsize=(6, 6))
-        nx.draw(G, with_labels=True, node_size=2000, font_size=10, ax=ax2)
+        fig2, ax2 = plt.subplots(figsize=(7, 7))
+        pos = nx.spring_layout(G, seed=42)
+        nx.draw(
+            G, pos,
+            with_labels=True,
+            node_size=2500,
+            node_color="skyblue",
+            font_size=9,
+            ax=ax2
+        )
         ax2.set_title("Resistance Network")
 
         return result_text, fig1, fig2
@@ -112,18 +151,17 @@ Recommendation:
         return f"Error: {str(e)}", None, None
 
 # =========================
-# UI DESIGN
+# UI
 # =========================
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
 
     gr.Markdown("""
-#  AI-Based Antibiotic Resistance Prediction System
-### Predict antibiotic effectiveness using AI
+# 🧠 AI-Based Antibiotic Resistance Prediction System
+### Smart Antibiotic Recommendation
 """)
 
     with gr.Row():
 
-        # LEFT SIDE INPUT
         with gr.Column():
 
             location = gr.Dropdown(choices=locations, label="Location")
@@ -138,17 +176,13 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
                 btn = gr.Button("Predict")
                 clear = gr.Button("Clear")
 
-        # RIGHT SIDE OUTPUT
         with gr.Column():
 
-            output = gr.Textbox(label="Result", lines=8)
+            output = gr.Textbox(label="AI Recommendation", lines=10)
             plot1 = gr.Plot(label="Resistance Graph")
             plot2 = gr.Plot(label="Network Graph")
 
-    # =========================
     # EVENTS
-    # =========================
-
     location.change(
         autofill,
         inputs=location,
@@ -171,4 +205,3 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
 # =========================
 port = int(os.environ.get("PORT", 10000))
 demo.launch(server_name="0.0.0.0", server_port=port)
-
