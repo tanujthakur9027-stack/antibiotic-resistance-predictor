@@ -2,7 +2,8 @@ import pickle
 import gradio as gr
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Agg")
 import networkx as nx
 
 # =========================
@@ -161,5 +162,11 @@ with gr.Blocks() as demo:
 # RUN
 # =========================
 import os
+
 port = int(os.environ.get("PORT", 10000))
-demo.launch(server_name="0.0.0.0", server_port=port)
+
+demo.launch(
+    server_name="0.0.0.0",
+    server_port=port,
+    share=False
+)
