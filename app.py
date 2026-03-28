@@ -147,8 +147,8 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             ciprofloxacin = gr.Slider(0, 40, value=20, label="CIPROFLOXACIN")
 
             with gr.Row():
-                btn = gr.Button("🚀 Predict", variant="primary")
-                clear = gr.Button("🧹 Clear")
+                btn = gr.Button(" Predict", variant="primary")
+                clear = gr.Button(" Clear")
 
         with gr.Column():
 
