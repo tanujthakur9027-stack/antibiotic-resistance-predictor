@@ -7,26 +7,25 @@ import networkx as nx
 import os
 
 # =========================
-# LOAD DATASET (SAFE)
+# LOAD DATASET (for UI)
 # =========================
 try:
     df = pd.read_excel("Dataset.xlsx")
-    locations = df["Location"].dropna().unique().tolist()
+    locations = df["Location"].unique().tolist()
 except:
     df = None
     locations = ["IFE-T"]
 
 # =========================
-# LOAD MODEL (SAFE)
+# LOAD MODEL
 # =========================
-try:
-    with open("model.pkl", "rb") as f:
-        model = pickle.load(f)
-except:
-    model = None
+with open("model.pkl", "rb") as f:
+    model = pickle.load(f)
+
+features = ["Location", "IMIPENEM", "CEFTAZIDIME", "GENTAMICIN", "AUGMENTIN", "CIPROFLOXACIN"]
 
 # =========================
-# AUTO-FILL FUNCTION
+# AUTO-FILL
 # =========================
 def autofill(location):
     if df is not None:
@@ -37,137 +36,170 @@ def autofill(location):
                 float(row.get("IMIPENEM", 20)),
                 float(row.get("CEFTAZIDIME", 20)),
                 float(row.get("GENTAMICIN", 20)),
-                float(row.get("AUGMENTIN", 20))
+                float(row.get("AUGMENTIN", 20)),
+                float(row.get("CIPROFLOXACIN", 20))
             )
-    return 20, 20, 20, 20
+    return 20, 20, 20, 20, 20
 
 # =========================
-# PREDICT FUNCTION (SAFE)
+# PREDICT + GRAPHS
 # =========================
-def predict(location, imipenem, ceftazidime, gentamicin, augmentin):
+def predict(location, imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin):
 
-    try:
-        if model is None:
-            return "❌ Model not loaded", None, None
+    location_map = {loc: i for i, loc in enumerate(locations)}
+    loc = location_map.get(location, 0)
 
-        # Encode location
-        location_map = {loc: i for i, loc in enumerate(locations)}
-        loc = location_map.get(location, 0)
+    #  6 FEATURES FIX
+    data = np.array([[loc, imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin]])
 
-        data = np.array([[loc, imipenem, ceftazidime, gentamicin, augmentin]])
+    pred = model.predict(data)[0]
+    probs = model.predict_proba(data)[0]
+    confidence = round(max(probs) * 100, 2)
 
-        # Prediction
-        pred = model.predict(data)[0]
+    # Result mapping
+    if pred == 0:
+        result = "🟢 Susceptible"
+        recommendation = "Use this antibiotic"
+    elif pred == 1:
+        result = "🟡 Intermediate"
+        recommendation = "Use with caution"
+    else:
+        result = "🔴 Resistant"
+        recommendation = "Avoid this antibiotic"
 
-        # Confidence (safe)
-        try:
-            probs = model.predict_proba(data)
-            probs = probs[0][0] if isinstance(probs, list) else probs[0]
-            confidence = round(max(probs) * 100, 2)
-        except:
-            confidence = 0
+    #  BETTER OUTPUT
+    result_text = f"""
+ Antibiotic Resistance Analysis
 
-        # Result mapping
-        if pred == 0:
-            result = "🟢 Susceptible"
-            recommendation = "Use this antibiotic"
-        elif pred == 1:
-            result = "🟡 Intermediate"
-            recommendation = "Use with caution"
-        else:
-            result = "🔴 Resistant"
-            recommendation = "Avoid this antibiotic"
-
-        result_text = f"""
- Prediction for CIPROFLOXACIN
+Prediction (Target Antibiotic): CIPROFLOXACIN
 
 Result: {result}
 Confidence: {confidence}%
+
+Input Values:
+IMIPENEM: {imipenem}
+CEFTAZIDIME: {ceftazidime}
+GENTAMICIN: {gentamicin}
+AUGMENTIN: {augmentin}
+CIPROFLOXACIN: {ciprofloxacin}
 
  Recommendation:
 {recommendation}
 """
 
-        # =========================
-        #  RESISTANCE GRAPH (FIXED)
-        # =========================
-        labels = ["CIPROFLOXACIN", "AUGMENTIN", "GENTAMICIN", "CEFTAZIDIME", "IMIPENEM"]
-        values = [pred, augmentin/20, gentamicin/20, ceftazidime/20, imipenem/20]
+    # =========================
+    #  IMPROVED GRAPH (CLEAR LABELS)
+    # =========================
+    labels = ["IMIPENEM", "CEFTAZIDIME", "GENTAMICIN", "AUGMENTIN", "CIPROFLOXACIN"]
+    values = [imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin]
 
-        fig1, ax1 = plt.subplots(figsize=(10, 5))
-        ax1.barh(labels, values)
-        ax1.set_title("Resistance Levels (0=Safe, 2=Resistant)")
-        ax1.set_xlabel("Resistance Score")
+    fig1, ax1 = plt.subplots(figsize=(10, 5))
+    bars = ax1.barh(labels, values)
 
-        plt.subplots_adjust(left=0.35)
+    ax1.set_title("Antibiotic Values")
+    ax1.set_xlabel("Value")
 
-        # =========================
-        #  NETWORK GRAPH
-        # =========================
-        G = nx.Graph()
-        for i in range(len(labels)):
-            for j in range(i + 1, len(labels)):
-                G.add_edge(labels[i], labels[j])
+    #  SHOW VALUES ON BARS
+    for bar in bars:
+        width = bar.get_width()
+        ax1.text(width + 0.5, bar.get_y() + bar.get_height()/2,
+                 f'{width}', va='center')
 
-        fig2, ax2 = plt.subplots()
-        nx.draw(G, with_labels=True, node_size=2000, ax=ax2)
-        ax2.set_title("Antibiotic Network")
+    #  FIX LABEL CUTTING
+    plt.subplots_adjust(left=0.35)
 
-        return result_text, fig1, fig2
+    # =========================
+    #  IMPROVED NETWORK GRAPH
+    # =========================
+    G = nx.Graph()
+    antibiotics = labels
 
-    except Exception as e:
-        return f" Error: {str(e)}", None, None
+    for i in range(len(antibiotics)):
+        for j in range(i + 1, len(antibiotics)):
+            G.add_edge(antibiotics[i], antibiotics[j])
 
+    fig2, ax2 = plt.subplots(figsize=(6, 6))
+
+    pos = nx.spring_layout(G, seed=42)  # better layout
+
+    nx.draw(
+        G, pos,
+        with_labels=True,
+        node_size=2500,
+        node_color="skyblue",
+        font_size=10,
+        ax=ax2
+    )
+
+    ax2.set_title("Antibiotic Relationship Network")
+
+    return result_text, fig1, fig2
 
 # =========================
-# UI
+# UI DESIGN
 # =========================
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
 
     gr.Markdown("""
-#  ResistAI – Antibiotic Resistance Predictor  
-### Smarter Antibiotics. Better Decisions.
+#  AI-Based Antibiotic Resistance Prediction System
+### Predict antibiotic effectiveness using AI
 """)
 
     with gr.Row():
 
         with gr.Column():
-            location = gr.Dropdown(choices=locations, label="Location")
+
+            gr.Markdown("###  Select Location")
+
+            location = gr.Dropdown(
+                choices=locations,
+                label="Location",
+                interactive=True
+            )
+
+            gr.Markdown("###  Input Antibiotics")
 
             imipenem = gr.Slider(0, 40, value=20, label="IMIPENEM")
             ceftazidime = gr.Slider(0, 40, value=20, label="CEFTAZIDIME")
             gentamicin = gr.Slider(0, 40, value=20, label="GENTAMICIN")
             augmentin = gr.Slider(0, 40, value=20, label="AUGMENTIN")
+            ciprofloxacin = gr.Slider(0, 40, value=20, label="CIPROFLOXACIN")  # ✅ NEW
 
             with gr.Row():
                 btn = gr.Button("Predict", variant="primary")
                 clear = gr.Button("Clear")
 
         with gr.Column():
-            output = gr.Textbox(label="Result", lines=8)
-            plot1 = gr.Plot(label="Resistance Graph")
-            plot2 = gr.Plot(label="Network Graph")
 
+            gr.Markdown("###  Prediction Output")
+
+            output = gr.Textbox(label="Result", lines=10)
+
+            plot1 = gr.Plot(label="Antibiotic Values")
+            plot2 = gr.Plot(label="Resistance Network")
+
+    # =========================
     # EVENTS
+    # =========================
     location.change(
         autofill,
         inputs=location,
-        outputs=[imipenem, ceftazidime, gentamicin, augmentin]
+        outputs=[imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin]
     )
 
     btn.click(
         predict,
-        inputs=[location, imipenem, ceftazidime, gentamicin, augmentin],
+        inputs=[location, imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin],
         outputs=[output, plot1, plot2]
     )
 
     clear.click(
-        lambda: (20, 20, 20, 20, "", None, None),
-        outputs=[imipenem, ceftazidime, gentamicin, augmentin, output, plot1, plot2]
+        lambda: (20, 20, 20, 20, 20, "", None, None),
+        outputs=[imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin, output, plot1, plot2]
     )
 
 # =========================
-# RUN (RENDER SAFE)
+# RUN
 # =========================
 port = int(os.environ.get("PORT", 10000))
 demo.launch(server_name="0.0.0.0", server_port=port)
