@@ -1,10 +1,10 @@
-# 🧠 AI-Based Antibiotic Resistance Prediction System
+#  AI-Based Antibiotic Resistance Prediction System
 
 An AI-powered decision support system that predicts antibiotic resistance and provides explainable insights for better healthcare decisions.
 
 ---
 
-## 🚀 Overview
+##  Overview
 
 Antibiotic resistance is a critical global health issue. Incorrect antibiotic selection can lead to treatment failure.
 
@@ -16,13 +16,13 @@ This project uses **Machine Learning** to:
 
 ---
 
-## 🌐 Live Demo
+##  Live Demo
 
 👉https://antibiotic-resistance-predictor-cycs.onrender.com/
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 * Predicts resistance for **Ciprofloxacin**
 * Uses **Primary + Secondary datasets**
@@ -35,9 +35,9 @@ This project uses **Machine Learning** to:
 
 ---
 
-## 🧪 Input & Output
+##  Input & Output
 
-### 🔹 Inputs
+###  Inputs
 
 * Location
 * IMIPENEM
@@ -45,7 +45,7 @@ This project uses **Machine Learning** to:
 * GENTAMICIN
 * AUGMENTIN
 
-### 🔹 Output
+###  Output
 
 * Prediction for **CIPROFLOXACIN**
 * Confidence score
@@ -57,13 +57,13 @@ This project uses **Machine Learning** to:
 
 ---
 
-## 🧠 Model
+##  Model
 
 * Algorithm: **Random Forest Classifier**
 * Type: Supervised Learning
 * Task: Classification
 
-### 📊 Data Handling
+###  Data Handling
 
 * Combined multiple datasets
 * Cleaned missing & inconsistent values
@@ -71,7 +71,7 @@ This project uses **Machine Learning** to:
 
 ---
 
-## 💻 Tech Stack
+##  Tech Stack
 
 * Python
 * Pandas, NumPy
@@ -82,7 +82,7 @@ This project uses **Machine Learning** to:
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```id="n3yoj6"
 ├── app.py
@@ -96,7 +96,7 @@ This project uses **Machine Learning** to:
 
 ---
 
-## 👨‍💻 Team
+##  Team
 
 * **Tanuj Kumar Singh** (Team Leader)
 * Bhavna Agrawal
@@ -104,7 +104,7 @@ This project uses **Machine Learning** to:
 
 ---
 
-## 🏆 Highlights
+##  Highlights
 
 * End-to-end ML pipeline
 * Real-world dataset integration
@@ -113,7 +113,7 @@ This project uses **Machine Learning** to:
 
 ---
 
-## 🔮 Future Scope
+##  Future Scope
 
 * Multi-output prediction
 * Real-time healthcare integration
@@ -121,10 +121,10 @@ This project uses **Machine Learning** to:
 
 ---
 
-## 📌 Conclusion
+##  Conclusion
 
 This system demonstrates how AI can help tackle antibiotic resistance by providing **accurate predictions and meaningful insights** for better treatment decisions.
 
 ---
 
-⭐ Star this repo if you found it useful!
+
