@@ -94,9 +94,9 @@ def predict(location, imipenem, ceftazidime, gentamicin, augmentin, ciprofloxaci
         res_text = ", ".join(resistant) if resistant else "None"
 
         result_text = f"""
-🧠 AI Recommendation System
+ AI Recommendation System
 
-✅ Best Antibiotic: {best}
+ Best Antibiotic: {best}
 
 🟢 Safe:
 {safe_text}
@@ -156,7 +156,7 @@ def predict(location, imipenem, ceftazidime, gentamicin, augmentin, ciprofloxaci
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
 
     gr.Markdown("""
-# 🧠 AI-Based Antibiotic Resistance Prediction System
+#  AI-Based Antibiotic Resistance Prediction System
 ### Smart Antibiotic Recommendation
 """)
 
