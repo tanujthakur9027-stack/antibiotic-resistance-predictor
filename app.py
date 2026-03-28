@@ -25,8 +25,6 @@ try:
 except:
     model = None
 
-features = ["Location", "IMIPENEM", "CEFTAZIDIME", "GENTAMICIN", "AUGMENTIN"]
-
 # =========================
 # AUTO-FILL FUNCTION
 # =========================
@@ -44,42 +42,43 @@ def autofill(location):
     return 20, 20, 20, 20
 
 # =========================
-# PREDICT FUNCTION
+# PREDICT FUNCTION (SAFE)
 # =========================
 def predict(location, imipenem, ceftazidime, gentamicin, augmentin):
 
-    if model is None:
-        return " Model not loaded", None, None
-
-    # Encode location
-    location_map = {loc: i for i, loc in enumerate(locations)}
-    loc = location_map.get(location, 0)
-
-    data = np.array([[loc, imipenem, ceftazidime, gentamicin, augmentin]])
-
-    # Prediction
-    pred = model.predict(data)[0]
-
-    # Confidence
     try:
-        probs = model.predict_proba(data)
-        probs = probs[0][0] if isinstance(probs, list) else probs[0]
-        confidence = round(max(probs) * 100, 2)
-    except:
-        confidence = 0
+        if model is None:
+            return "❌ Model not loaded", None, None
 
-    # Result
-    if pred == 0:
-        result = "🟢 Susceptible"
-        recommendation = "Use this antibiotic"
-    elif pred == 1:
-        result = "🟡 Intermediate"
-        recommendation = "Use with caution"
-    else:
-        result = "🔴 Resistant"
-        recommendation = "Avoid this antibiotic"
+        # Encode location
+        location_map = {loc: i for i, loc in enumerate(locations)}
+        loc = location_map.get(location, 0)
 
-    result_text = f"""
+        data = np.array([[loc, imipenem, ceftazidime, gentamicin, augmentin]])
+
+        # Prediction
+        pred = model.predict(data)[0]
+
+        # Confidence (safe)
+        try:
+            probs = model.predict_proba(data)
+            probs = probs[0][0] if isinstance(probs, list) else probs[0]
+            confidence = round(max(probs) * 100, 2)
+        except:
+            confidence = 0
+
+        # Result mapping
+        if pred == 0:
+            result = "🟢 Susceptible"
+            recommendation = "Use this antibiotic"
+        elif pred == 1:
+            result = "🟡 Intermediate"
+            recommendation = "Use with caution"
+        else:
+            result = "🔴 Resistant"
+            recommendation = "Avoid this antibiotic"
+
+        result_text = f"""
  Prediction for CIPROFLOXACIN
 
 Result: {result}
@@ -89,36 +88,36 @@ Confidence: {confidence}%
 {recommendation}
 """
 
-    # =========================
-    #  RESISTANCE GRAPH (FIXED LABEL ISSUE)
-    # =========================
-    labels = ["CIPROFLOXACIN", "AUGMENTIN", "GENTAMICIN", "CEFTAZIDIME", "IMIPENEM"]
-    values = [pred, augmentin/20, gentamicin/20, ceftazidime/20, imipenem/20]
+        # =========================
+        #  RESISTANCE GRAPH (FIXED)
+        # =========================
+        labels = ["CIPROFLOXACIN", "AUGMENTIN", "GENTAMICIN", "CEFTAZIDIME", "IMIPENEM"]
+        values = [pred, augmentin/20, gentamicin/20, ceftazidime/20, imipenem/20]
 
-    fig1, ax1 = plt.subplots(figsize=(10, 5))
-    ax1.barh(labels, values)
+        fig1, ax1 = plt.subplots(figsize=(10, 5))
+        ax1.barh(labels, values)
+        ax1.set_title("Resistance Levels (0=Safe, 2=Resistant)")
+        ax1.set_xlabel("Resistance Score")
 
-    ax1.set_title("Resistance Levels (0=Safe, 2=Resistant)")
-    ax1.set_xlabel("Resistance Score")
+        plt.subplots_adjust(left=0.35)
 
-    # FIX CUT LABELS
-    plt.subplots_adjust(left=0.35)
+        # =========================
+        #  NETWORK GRAPH
+        # =========================
+        G = nx.Graph()
+        for i in range(len(labels)):
+            for j in range(i + 1, len(labels)):
+                G.add_edge(labels[i], labels[j])
 
-    # =========================
-    #  NETWORK GRAPH
-    # =========================
-    G = nx.Graph()
-    antibiotics = ["IMIPENEM", "CEFTAZIDIME", "GENTAMICIN", "AUGMENTIN", "CIPROFLOXACIN"]
+        fig2, ax2 = plt.subplots()
+        nx.draw(G, with_labels=True, node_size=2000, ax=ax2)
+        ax2.set_title("Antibiotic Network")
 
-    for i in range(len(antibiotics)):
-        for j in range(i + 1, len(antibiotics)):
-            G.add_edge(antibiotics[i], antibiotics[j])
+        return result_text, fig1, fig2
 
-    fig2, ax2 = plt.subplots()
-    nx.draw(G, with_labels=True, node_size=2000, ax=ax2)
-    ax2.set_title("Antibiotic Network")
+    except Exception as e:
+        return f" Error: {str(e)}", None, None
 
-    return result_text, fig1, fig2
 
 # =========================
 # UI
@@ -126,14 +125,13 @@ Confidence: {confidence}%
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
 
     gr.Markdown("""
-# ResistAI – Antibiotic Resistance Predictor  
+#  ResistAI – Antibiotic Resistance Predictor  
 ### Smarter Antibiotics. Better Decisions.
 """)
 
     with gr.Row():
 
         with gr.Column():
-
             location = gr.Dropdown(choices=locations, label="Location")
 
             imipenem = gr.Slider(0, 40, value=20, label="IMIPENEM")
@@ -146,7 +144,6 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
                 clear = gr.Button("Clear")
 
         with gr.Column():
-
             output = gr.Textbox(label="Result", lines=8)
             plot1 = gr.Plot(label="Resistance Graph")
             plot2 = gr.Plot(label="Network Graph")
