@@ -93,9 +93,9 @@ CIPROFLOXACIN: {ciprofloxacin}
     labels = ["IMIPENEM", "CEFTAZIDIME", "GENTAMICIN", "AUGMENTIN", "CIPROFLOXACIN"]
     values = [imipenem, ceftazidime, gentamicin, augmentin, ciprofloxacin]
 
-    fig1, ax1 = plt.subplots(figsize=(10, 5))
-    bars = ax1.barh(labels, values)
-
+    fig1, ax1 = plt.subplots(figsize=(7,4)) 
+    palette = sns.color_palette("crest", len(labels))
+    bars = ax1.barh(labels, values, color=palette)
     ax1.set_title("Antibiotic Values")
     ax1.set_xlabel("Value")
 
