@@ -18,8 +18,7 @@ This project uses **Machine Learning** to:
 
 ##  Live Demo
 
-https://antibiotic-resistance-predictor-pfky.onrender.com
-
+https://antibiotic-resistance-predictor-1.onrender.com
 ---
 
 ##  Key Features
