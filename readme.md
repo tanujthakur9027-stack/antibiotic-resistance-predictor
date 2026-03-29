@@ -1,129 +1,133 @@
 #  AI-Based Antibiotic Resistance Prediction System
 
-An AI-powered decision support system that predicts antibiotic resistance and provides explainable insights for better healthcare decisions.
+An AI-powered decision support system that analyzes antibiotic resistance patterns and provides smart recommendations for better healthcare decisions.
 
 ---
 
 ##  Overview
 
-Antibiotic resistance is a critical global health issue. Incorrect antibiotic selection can lead to treatment failure.
+Antibiotic resistance is a major global health challenge. Incorrect antibiotic selection can lead to treatment failure.
 
-This project uses **Machine Learning** to:
+This system uses **Machine Learning + Rule-based analysis** to:
 
-* Predict antibiotic resistance
-* Provide confidence scores
-* Assist in clinical decision-making
+- Analyze resistance levels of multiple antibiotics  
+- Recommend the best antibiotic  
+- Provide clear and interpretable results  
 
 ---
 
 ##  Live Demo
 
 https://antibiotic-resistance-predictor-1.onrender.com
+
 ---
 
 ##  Key Features
 
-* Predicts resistance for **Ciprofloxacin**
-* Uses **Primary + Secondary datasets**
-* Handles real-world noisy data
-* Provides **confidence score + recommendation**
-* Interactive UI built with **Gradio**
-* Auto-fill based on location
-* Includes **feature importance graph**
-* Includes **resistance network visualization**
+  - Analyzes **5 antibiotics simultaneously**
+  - Inputs include:
+  - Location  
+  - IMIPENEM  
+  - CEFTAZIDIME  
+  - GENTAMICIN  
+  - AUGMENTIN  
+  - CIPROFLOXACIN  
+
+-  Provides:
+  - Best antibiotic recommendation  
+  - Safe antibiotics list  
+  - Intermediate antibiotics list  
+  - Resistant antibiotics list  
+
+  - Interactive visualizations:
+  - Resistance graph  
+  - Antibiotic relationship network  
+
+-  Auto-fill based on location  
+-  Handles real-world noisy data  
 
 ---
 
-##  Input & Output
+##  Input &  Output
 
 ###  Inputs
 
-* Location
-* IMIPENEM
-* CEFTAZIDIME
-* GENTAMICIN
-* AUGMENTIN
+- Location  
+- IMIPENEM  
+- CEFTAZIDIME  
+- GENTAMICIN  
+- AUGMENTIN  
+- CIPROFLOXACIN  
+
+---
 
 ###  Output
 
-* Prediction for **CIPROFLOXACIN**
-* Confidence score
-* Recommendation:
-
-  * 🟢 Use
-  * 🟡 Use with caution
-  * 🔴 Avoid
+- 🧠 **Best Antibiotic Recommendation**  
+- 🟢 Safe Antibiotics  
+- 🟡 Intermediate Antibiotics  
+- 🔴 Resistant Antibiotics  
 
 ---
 
 ##  Model
 
-* Algorithm: **Random Forest Classifier**
-* Type: Supervised Learning
-* Task: Classification
+- Algorithm: **Random Forest Classifier**
+- Type: Supervised Learning  
+- Task: Classification  
 
-###  Data Handling
+---
 
-* Combined multiple datasets
-* Cleaned missing & inconsistent values
-* Performed feature engineering
+##  Data Handling
+
+- Combined **Primary + Secondary datasets**  
+- Cleaned missing & inconsistent values  
+- Converted raw values into resistance categories  
+- Feature engineering for better predictions  
 
 ---
 
 ##  Tech Stack
 
-* Python
-* Pandas, NumPy
-* Scikit-learn
-* Gradio
-* Matplotlib
-* NetworkX
+- Python  
+- Pandas, NumPy  
+- Scikit-learn  
+- Gradio  
+- Matplotlib  
+- NetworkX  
 
 ---
 
 ##  Project Structure
-
-```id="n3yoj6"
-├── app.py
-├── train.py
-├── model.pkl
-├── Dataset.xlsx
-├── Bacteria_dataset_Multiresictance.csv
-├── requirements.txt
-└── README.md
-```
-
 ---
 
 ##  Team
 
-* **Tanuj Kumar Singh** (Team Leader)
-* Bhavna Agrawal
-* Divya Goyal
+- **Tanuj Kumar Singh** (Team Leader)  
+- Bhavna Agrawal  
+- Divya Goyal  
 
 ---
 
 ##  Highlights
 
-* End-to-end ML pipeline
-* Real-world dataset integration
-* Interactive AI system
-* Explainable predictions
+- End-to-end ML pipeline  
+- Multi-antibiotic analysis system  
+- Interactive AI dashboard  
+- Clear and explainable results  
+- Real-world dataset integration  
 
 ---
 
 ##  Future Scope
 
-* Multi-output prediction
-* Real-time healthcare integration
-* Advanced AI models
+- Multi-output ML model (predict all antibiotics via AI)  
+- Integration with hospital systems  
+- Real-time clinical decision support  
+- Advanced deep learning models  
 
 ---
 
 ##  Conclusion
 
-This system demonstrates how AI can help tackle antibiotic resistance by providing **accurate predictions and meaningful insights** for better treatment decisions.
-
----
-
-
+This project demonstrates how AI can assist in tackling antibiotic resistance by providing **clear insights, better recommendations, and data-driven decisions** for effective treatment.
